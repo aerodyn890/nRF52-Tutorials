@@ -3,5 +3,5 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
 project(LED-Control)
 
-target_sources(app PRIVATE src/main.cpp)
+target_sources(app PRIVATE src/main.c)
 target_include_directories(app PRIVATE C:/ncs/v2.5.0/zephyr/include)
