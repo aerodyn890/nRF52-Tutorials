@@ -1,0 +1,6 @@
+# Copyright (c) 2024 Nordic Semiconductor ASA
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_NRF52_DEVBOARD_52832
+	bool "nRF52-Devboard-52832"
+	depends on SOC_NRF52832_QFAA
