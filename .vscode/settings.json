@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "kernel.h": "c"
+    },
+    "C_Cpp.default.compilerPath": "c:\\ncs\\toolchains\\c57af46cb7\\opt\\zephyr-sdk\\arm-zephyr-eabi\\bin\\arm-zephyr-eabi-gcc.exe"
+}
