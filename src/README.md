@@ -1,5 +1,4 @@
-# LED Control Tutorial
-
+# UARTE USB Example
 ## Summary
 Example for UARTE with CH340 UART to USB Bridge in Roverdyn Inc. nRF52DK development kit.
 
