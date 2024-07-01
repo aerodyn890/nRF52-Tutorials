@@ -34,22 +34,21 @@
 void SAADC_IRQHandler();
 
 /* SAADC  Buffer */
-uint8_t saadc_buffer[255] = {0};
+uint16_t saadc_buffer;
 
 int main(void)
 {
         printk("SAADC Example application start.\n");
         // SAADC Configurations
-        NRF_SAADC->SAMPLERATE = SAADC_SAMPLERATE_MODE_Timers << SAADC_SAMPLERATE_MODE_Pos;
-        NRF_SAADC->SAMPLERATE |= SAADC_SAMPLERATE << SAADC_SAMPLERATE_CC_Pos;
+        NRF_SAADC->SAMPLERATE = SAADC_SAMPLERATE_MODE_Task << SAADC_SAMPLERATE_MODE_Pos;
+        //NRF_SAADC->SAMPLERATE |= SAADC_SAMPLERATE << SAADC_SAMPLERATE_CC_Pos;
         NRF_SAADC->RESOLUTION = SAADC_RESOLUTION_VAL_14bit << SAADC_RESOLUTION_VAL_Pos;
         NRF_SAADC->CH[0].CONFIG |= SAADC_CH_CONFIG_GAIN_Gain1_6 << SAADC_CH_CONFIG_GAIN_Pos;
         NRF_SAADC->CH[0].CONFIG |= SAADC_CH_CONFIG_TACQ_10us << SAADC_CH_CONFIG_TACQ_Pos;
-        NRF_SAADC->CH[0].PSELP = SAADC_CH_PSELP_PSELP_AnalogInput0;
+        NRF_SAADC->CH[0].PSELP = SAADC_CH_PSELP_PSELP_AnalogInput0 << SAADC_CH_PSELP_PSELP_Pos;
         NRF_SAADC->CH[0].PSELN = 0;
-        NRF_SAADC->RESULT.PTR = (uint32_t)saadc_buffer;
-        NRF_SAADC->RESULT.MAXCNT = 255;
-        NRF_SAADC->INTENSET = SAADC_INTEN_CALIBRATEDONE_Enabled << SAADC_INTEN_CALIBRATEDONE_Pos;
+        NRF_SAADC->RESULT.PTR = (uint32_t)&saadc_buffer;
+        NRF_SAADC->RESULT.MAXCNT = 1;
         NRF_SAADC->INTENSET |= SAADC_INTEN_RESULTDONE_Enabled << SAADC_INTEN_RESULTDONE_Pos;
         NRF_SAADC->ENABLE = 0x01;
         
@@ -58,13 +57,14 @@ int main(void)
         irq_enable(SAADC_IRQn);
 
         // SAADC Calibration
-        NRF_SAADC->TASKS_START = 1;
         NRF_SAADC->TASKS_CALIBRATEOFFSET = 1;
+        while (NRF_SAADC->EVENTS_CALIBRATEDONE == 0);
+        NRF_SAADC->EVENTS_CALIBRATEDONE = 0;
+        while (NRF_SAADC->STATUS == (SAADC_STATUS_STATUS_Busy <<SAADC_STATUS_STATUS_Pos));
 
         while(true){
                 // Main loop
-                k_msleep(100);
-                //printk("%d\n", saadc_buffer[0]);
+                __WFI();
         }
         return 0;
 }
@@ -72,18 +72,14 @@ int main(void)
 void SAADC_IRQHandler(){
         // Fucntions for SAADC Interrupt
         static uint8_t order = 0;
-        if(NRF_SAADC->EVENTS_CALIBRATEDONE == 1){
-                NRF_SAADC->EVENTS_CALIBRATEDONE = 0;
-                printk("EVENTS_CALIBRATEDONE\n");
-                NRF_SAADC->TASKS_SAMPLE = 1;
-        }
-
         if(NRF_SAADC->EVENTS_RESULTDONE == 1){
                 NRF_SAADC->EVENTS_RESULTDONE = 0;
                 //printk("EVENTS_RESULTDONE\n");
-                printk("%03d : %d\n", order, saadc_buffer[order++]);
+                printk("%d\r\n", saadc_buffer);
                 if(order == 255){
                         order = 0;
                 }
+                NRF_SAADC->TASKS_START = 1;
+                NRF_SAADC->TASKS_SAMPLE = 1;
         }
 }
