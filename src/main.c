@@ -73,9 +73,11 @@ void TIMER2_IRQHandler(){
                 NRF_TIMER2->EVENTS_COMPARE[0] = 0;
                 if(!isLedOn){
                         isLedOn = true;
+                        printk("LED On : Green\n");
                         NRF_GPIO->OUTCLR = (1 << GPIO_LED_GREEN);
                 }else{
                         isLedOn = false;
+                        printk("LED Off : Green\n");
                         NRF_GPIO->OUTSET = (1 << GPIO_LED_GREEN);
                 }
         }
